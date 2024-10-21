@@ -1,0 +1,98 @@
+# do
+name: narvi
+
+networks:
+  net:
+
+volumes:
+  vol-pgadmin:
+  vol-pgsql:
+
+services:
+  base:
+    image: narvi-dev-base:latest
+    build:
+      dockerfile: _/Dockerfile
+      context: .
+    hostname: narvi-dev-base
+    container_name: narvi-dev-base
+    restart: no
+    entrypoint: [ "sleep" ]
+    command: [ "infinity" ]
+    network_mode: none
+  python-interpreter:
+    image: narvi-dev-base:latest
+    container_name: narvi-dev-python-interpreter
+    hostname: narvi-dev-python-interpreter
+    restart: unless-stopped
+    volumes:
+      - ".:/narvi-python-interpreter"
+    entrypoint: [ "sleep" ]
+    command: [ "infinity" ]
+    networks:
+      net:
+        aliases:
+          - python-interpreter
+  dev:
+    image: narvi-dev-base:latest
+    container_name: narvi-dev
+    hostname: narvi-dev
+    restart: unless-stopped
+    volumes:
+      - ".:/project"
+    networks:
+      net:
+        aliases:
+          - dev
+          - www.dev
+          - dev.local
+          - www.dev.local
+    ports:
+      - "8080:8080"   # NGINX
+      - "8000:8000"   # django development server
+      - "9001:9001"   # supervisor HTTP service
+    entrypoint: [ "/root/.local/bin/supervisord" ]
+    command: [ "--nodaemon",
+               "--configuration",
+               "/project/_/etc/supervisor/supervisord.conf" ]
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    privileged: true
+    hostname: pgadmin
+    container_name: narvi-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pg@sql.com
+      PGADMIN_DEFAULT_PASSWORD: pgsql
+      PGADMIN_LISTEN_PORT: 80
+      PGADMIN_CONFIG_CONSOLE_LOG_LEVEL: "20"
+    networks:
+      net:
+        aliases:
+          - pgadmin
+    ports:
+      - "5050:80"
+    volumes:
+      - vol-pgadmin:/var/lib/pgadmin
+
+  postgres:
+    image: postgres:15
+    hostname: postgres
+    container_name: narvi-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    networks:
+      net:
+        aliases:
+          - pgsql
+          - postgres
+#    ports:
+#      - "5432:5432"
+    volumes:
+      - vol-pgsql:/var/lib/postgresql/data
+
+
+
