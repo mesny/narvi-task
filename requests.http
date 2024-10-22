@@ -1,0 +1,133 @@
+
+### Get all groups
+# @name GetAllGroups
+GET {{base_addr}}/groups/?format=json
+Accept: application/json
+
+> {% client.global.set("first_group_id", response.body[0].id); %}
+
+
+### Fetch specific group
+# @name FetchGroupById
+GET {{base_addr}}/groups/{{first_group_id}}/?format=json
+Accept: application/json
+
+
+### Get all tokens
+# @name GetAllTokens
+GET {{base_addr}}/tokens/?format=json
+Accept: application/json
+
+> {% client.global.set("first_token_id", response.body[0].id); %}
+
+
+### Fetch specific token
+# @name FetchTokenById
+GET {{base_addr}}/tokens/{{first_token_id}}/?format=json
+Accept: application/json
+
+
+### Create a new group
+# @name CreateGroup
+POST {{base_addr}}/groups/?format=json
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "foobar2"
+}
+> {% client.global.set("new_group_id", response.body.id); %}
+
+
+### Test if its created
+GET {{base_addr}}/groups/{{new_group_id}}/?format=json
+Accept: application/json
+
+
+### Update the new group
+# @name UpdateGroup
+PATCH {{base_addr}}/groups/{{new_group_id}}/?format=json
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "updated2"
+}
+
+
+### Test if its updated
+GET {{base_addr}}/groups/{{new_group_id}}/?format=json
+Accept: application/json
+
+
+### Add new token to the new group
+# @name CreateToken
+POST {{base_addr}}/tokens/?format=json
+Content-Type: application/json
+Accept: application/json
+
+{
+  "group": "{{new_group_id}}",
+  "value": "token"
+}
+> {% client.global.set("new_token_id", response.body.id); %}
+
+
+### Fetch the new token
+GET {{base_addr}}/tokens/{{new_token_id}}/?format=json
+Accept: application/json
+
+
+### Update the new token
+# @name UpdateToken
+PATCH {{base_addr}}/tokens/{{new_token_id}}/?format=json
+Content-Type: application/json
+Accept: application/json
+
+{
+  "value": "something"
+}
+
+
+### Fetch the updated token
+GET {{base_addr}}/tokens/{{new_token_id}}/?format=json
+Content-Type: application/json
+Accept: application/json
+
+
+### Move the token to another group
+# @name MoveToken
+PATCH {{base_addr}}/tokens/{{new_token_id}}/move/?format=json
+Content-Type: application/json
+Accept: application/json
+
+{
+  "target_group_id": "{{first_group_id}}"
+}
+
+
+### Fetch the moved token
+GET {{base_addr}}/tokens/{{new_token_id}}/?format=json
+Content-Type: application/json
+Accept: application/json
+
+
+### Delete the new token
+# @name DeleteToken
+DELETE {{base_addr}}/tokens/{{new_token_id}}/?format=json
+
+
+### Check if its really deleted
+GET {{base_addr}}/tokens/{{new_token_id}}/?format=json
+Accept: application/json
+
+
+### Delete the new group
+# @name GroupToken
+DELETE {{base_addr}}/groups/{{new_group_id}}/?format=json
+
+
+### Check if its really deleted
+GET {{base_addr}}/groups/{{new_group_id}}/?format=json
+Accept: application/json
+
