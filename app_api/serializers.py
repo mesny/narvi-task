@@ -1,16 +1,12 @@
 from rest_framework import serializers
-from tutorial.quickstart.serializers import GroupSerializer
-
 from .models import Group, Token
 
 
 
 class TokenSerializer(serializers.ModelSerializer):
-    # group = GroupSerializer(many=False, read_only=False)
     class Meta:
         model = Token
-        fields = ['group_id', 'id', 'value', 'created', 'updated']
-        read_only_fields = ['id', 'created', 'updated']
+        fields = ['group', 'id', 'value', 'created', 'updated']
 
 
 
@@ -19,6 +15,5 @@ class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = ['id', 'name', 'version', 'created', 'updated', 'tokens']
-        read_only_fields = ['id', 'version', 'created', 'updated', 'tokens']
 
 
